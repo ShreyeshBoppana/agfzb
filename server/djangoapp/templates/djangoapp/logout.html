@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout</title>
+</head>
+<body>
+    <h1>Logout Successful</h1>
+        <p>Thank you, {{ superuser_name }}, for using our application. You have been successfully logged out.</p>
+
+    <!-- Add a logout button linking to the login page -->
+    <a href="{% url 'djangoapp:login' %}">Login Again</a>
+</body>
+</html>
