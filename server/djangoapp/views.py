@@ -13,6 +13,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.management import call_command
 import logging
 import json
+from cloudant.client import Cloudant
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -115,9 +116,23 @@ def create_superuser(request):
 
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
-    context = {}
-    if request.method == "GET":
-        return render(request, 'djangoapp/index.html', context)
+    credentials = {
+    "COUCH_USERNAME": "ab981cfb-e733-47e6-8485-ad9006c44a9e-bluemix",
+    "IAM_API_KEY": "HSTZ31wV2O8kj6DgM_EfE3BfjTMmbEvFjn6EvdYdPrm4"
+    }
+
+# Connect to Cloudant with IAM authentication
+    client = Cloudant.iam(
+        account_name=credentials["COUCH_USERNAME"],
+        api_key=credentials["IAM_API_KEY"],
+        connect=True
+    )
+
+    response_data = {"dbs": client.all_dbs()}  # Store data in a dictionary
+    response = HttpResponse(json.dumps(response_data), content_type="application/json")  # Create HttpResponse
+
+    
+    return response  # Return the HttpResponse object with headers
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
