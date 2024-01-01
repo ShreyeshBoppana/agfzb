@@ -12,7 +12,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.hashers import make_password
 from django.core.management import call_command
 import logging
-import json
+import json,requests
 from cloudant.client import Cloudant
 
 # Get an instance of a logger
@@ -196,3 +196,75 @@ def get_reviews(request , id):
     
     return response
 
+'''def get_sentiment(request):
+    url = 'https://sn-watson-sentiment-bert.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/SentimentPredict'
+    myobj = { "raw_document": { "text": "I am happy" } }
+    header = {"grpc-metadata-mm-model-id": "sentiment_aggregated-bert-workflow_lang_multi_stock"}
+    response = requests.post(url, json = myobj, headers=header)
+    f=json.loads(response.text)
+    label = f['documentSentiment']['label']
+    score = f['documentSentiment']['score']
+    d={}
+    d['label']=label
+    d['score']=score
+    response = HttpResponse(json.dumps(d), content_type="application/json")
+    
+    return response'''
+
+
+def get_sentiment(request , id):
+    credentials = {
+        "COUCH_USERNAME": "ab981cfb-e733-47e6-8485-ad9006c44a9e-bluemix",
+        "IAM_API_KEY": "HSTZ31wV2O8kj6DgM_EfE3BfjTMmbEvFjn6EvdYdPrm4"
+    }
+
+    # Connect to Cloudant with IAM authentication
+    client = Cloudant.iam(
+        account_name=credentials["COUCH_USERNAME"],
+        api_key=credentials["IAM_API_KEY"],
+        connect=True
+    )
+
+    # Get a list of all databases
+    all_dbs = client.all_dbs()
+
+    # Create a dictionary to store data
+    response_data = {"dbs": all_dbs, "data": {}}
+
+    # Extract data from each database
+    for db_name in all_dbs:
+        database = client[db_name]
+        documents = [doc for doc in database]
+        response_data["data"][db_name] = documents
+
+    d=response_data["data"]["reviews"]
+
+    j=json.loads(json.dumps(d))
+
+
+    d=dict()
+
+    for entry in j:
+        if entry.get('id') == id:
+            d=entry.get('review')
+
+    # Close the Cloudant connection
+    client.disconnect()
+
+    s=str(d)
+    # Create HttpResponse
+
+
+    url = 'https://sn-watson-sentiment-bert.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/SentimentPredict'
+    myobj = { "raw_document": { "text": s } }
+    header = {"grpc-metadata-mm-model-id": "sentiment_aggregated-bert-workflow_lang_multi_stock"}
+    response = requests.post(url, json = myobj, headers=header)
+    '''f=json.loads(response.text)
+    label = f['documentSentiment']['label']
+    score = f['documentSentiment']['score']
+    d={}
+    d['label']=label
+    d['score']=score'''
+    response = HttpResponse(response, content_type="application/json")
+    
+    return response

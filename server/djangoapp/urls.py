@@ -32,4 +32,6 @@ urlpatterns = [
 
     path('review/<int:id>/', views.get_reviews, name='reviews'),
 
+     path('sent/<int:id>', views.get_sentiment, name='sent'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
