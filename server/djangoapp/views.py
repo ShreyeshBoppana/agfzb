@@ -117,29 +117,36 @@ def create_superuser(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     credentials = {
-    "COUCH_USERNAME": "ab981cfb-e733-47e6-8485-ad9006c44a9e-bluemix",
-    "IAM_API_KEY": "HSTZ31wV2O8kj6DgM_EfE3BfjTMmbEvFjn6EvdYdPrm4"
+        "COUCH_USERNAME": "ab981cfb-e733-47e6-8485-ad9006c44a9e-bluemix",
+        "IAM_API_KEY": "HSTZ31wV2O8kj6DgM_EfE3BfjTMmbEvFjn6EvdYdPrm4"
     }
 
-# Connect to Cloudant with IAM authentication
+    # Connect to Cloudant with IAM authentication
     client = Cloudant.iam(
         account_name=credentials["COUCH_USERNAME"],
         api_key=credentials["IAM_API_KEY"],
         connect=True
     )
 
-    response_data = {"dbs": client.all_dbs()}  # Store data in a dictionary
-    response = HttpResponse(json.dumps(response_data), content_type="application/json")  # Create HttpResponse
+    # Get a list of all databases
+    all_dbs = client.all_dbs()
 
+    # Create a dictionary to store data
+    response_data = {"dbs": all_dbs, "data": {}}
+
+    # Extract data from each database
+    for db_name in all_dbs:
+        database = client[db_name]
+        documents = [doc for doc in database]
+        response_data["data"][db_name] = documents
+
+    d=response_data["data"]
+
+    # Close the Cloudant connection
+    client.disconnect()
+
+    # Create HttpResponse
+    response = HttpResponse(json.dumps(d), content_type="application/json")
     
-    return response  # Return the HttpResponse object with headers
-
-
-# Create a `get_dealer_details` view to render the reviews of a dealer
-# def get_dealer_details(request, dealer_id):
-# ...
-
-# Create a `add_review` view to submit a review
-# def add_review(request, dealer_id):
-# ...
+    return response
 
