@@ -30,4 +30,6 @@ urlpatterns = [
 
     # path for add a review view
 
+    path('review/<int:id>/', views.get_reviews, name='reviews'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
