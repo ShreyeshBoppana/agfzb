@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Dealerships</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .state-filter {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Car Dealerships</h2>
+
+<!-- State Filter Dropdown -->
+<div class="state-filter">
+    <label for="state-filter">Filter by State:</label>
+    <select id="state-filter">
+        <option value="">All States</option>
+        {% for state in unique_states %}
+            <option value="{{ state }}">{{ state }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Car Dealerships Table -->
+<table id="dealerships-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>City</th>
+            <th>Address</th>
+            <th>ZIP</th>
+            <th>State</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for dealership in dealerships %}
+            <tr data-state="{{ dealership.state }}">
+                <td>{{ dealership.id }}</td>
+                <td>{{ dealership.full_name }}</td>
+                <td>{{ dealership.city }}</td>
+                <td>{{ dealership.address }}</td>
+                <td>{{ dealership.zip }}</td>
+                <td>{{ dealership.state }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    // JavaScript to handle state filter
+    document.getElementById('state-filter').addEventListener('change', function () {
+        var selectedState = this.value;
+        var rows = document.getElementById('dealerships-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+        for (var i = 0; i < rows.length; i++) {
+            var rowState = rows[i].getAttribute('data-state');
+            if (selectedState === '' || selectedState === rowState) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

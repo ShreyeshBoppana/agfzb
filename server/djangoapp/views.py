@@ -142,15 +142,22 @@ def get_dealerships(request):
 
     d=response_data["data"]["dealerships"]
 
+    j=json.dumps(d)
+
+
+    dealerships = json.loads(j)
+
+    
     # Close the Cloudant connection
     client.disconnect()
 
+    unique_states=set()
+
+    for dealership in dealerships:
+        unique_states.add(dealership["state"])
+
     # Create HttpResponse
-    response = HttpResponse(json.dumps(d), content_type="application/json")
-    
-    return response
-
-
+    return render(request, 'djangoapp/car_dealerships.html', {'dealerships': dealerships , 'unique_states':unique_states})
 
 def get_reviews(request , id):
     credentials = {
@@ -187,6 +194,8 @@ def get_reviews(request , id):
     for entry in j:
         if entry.get('id') == id:
             d=entry
+
+    
 
     # Close the Cloudant connection
     client.disconnect()
